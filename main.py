@@ -1,4 +1,5 @@
 import sys
+from tkinter import N
 from rich.console import Console
 import typer
 
@@ -83,6 +84,14 @@ def overwrite_copy_back() -> None:
         console.print(f'MAIN - Copy back [green]{file}[/] to [blue]{dst}[/]')
 
 
+@app.command('s')
+def status() -> None:
+    """
+    Show the status of git repository.
+    """
+    os.system('git status')
+
+
 @app.command('ps')
 def push_to_git() -> None:
     """
@@ -107,6 +116,7 @@ COMMANDS = {
     'e': (enc_all_files, 'Encrypt all files'),
     'd': (dec_all_files, 'Decrypt all files'),
     'o': (overwrite_copy_back, 'Copy back all decrypted files'),
+    's': (status, 'Show the status of git repository'),
     'ps': (push_to_git, 'Push all encrypted files to git'),
     'pl': (pull_from_git, 'Pull all encrypted files from git'),
 }
