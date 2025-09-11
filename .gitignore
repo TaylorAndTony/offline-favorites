@@ -1,0 +1,27 @@
+# This project
+_private/
+_temp/
+local/
+test/
+download/
+key
+key.*
+
+# IDE based
+.idea/
+.vscode/
+.mypy_cache/
+venv/
+.venv/
+.env/
+
+# lang based
+*.py[coid]
+**/__pycache__/
+
+node_modules/
+
+*.css.map
+
+# others
+*.exe

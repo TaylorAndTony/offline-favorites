@@ -1,0 +1,14 @@
+[project]
+name = "offline-favorites"
+version = "0.1.0"
+description = "This is not a Python package"
+requires-python = ">=3.10"
+dependencies = [
+    "pycryptodome>=3.23.0",
+    "rich>=14.1.0",
+    "typer>=0.17.4",
+]
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
