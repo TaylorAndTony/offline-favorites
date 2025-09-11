@@ -31,7 +31,7 @@ def enc_one_file(filename: str) -> None:
         data = f.read()
     enc = lib.AESTool(keys[0], keys[1]).encrypt(data)
     console.print(f'  encrypt done [cyan]{filename}[/]')
-    save_path = Path('_public') / Path(filename).with_suffix('.enc').name
+    save_path = Path('_public') / (Path(filename).name + '.enc')
 
     with open(save_path, 'w', encoding='utf-8') as f:
         b64 = lib.bytes_to_base64(enc)
@@ -49,7 +49,7 @@ def dec_one_file(filename: str) -> None:
         console.print(f'  decrypt failed [yellow]{filename}[/]')
     else:
         console.print(f'  decrypt done [green]{filename}[/]')
-        save_path = Path('_temp') / Path(filename).with_suffix('.md').name
+        save_path = Path('_temp') / Path(filename).name.rstrip('.enc')
         with open(save_path, 'wb') as f:
             f.write(dec)
         console.print(f'  save to [blue]{save_path}[/]')
@@ -60,7 +60,7 @@ def enc_all_files() -> None:
     """
     Encrypt all files in _private folder and save them in _public folder.
     """
-    for file in Path('_private').glob('*.md'):
+    for file in Path('_private').glob('*.*'):
         enc_one_file(str(file))
 
 
@@ -69,7 +69,7 @@ def dec_all_files() -> None:
     """
     Decrypt all files in _public folder and save them in _temp folder.
     """
-    for file in Path('_public').glob('*.enc'):
+    for file in Path('_public').glob('*.*'):
         dec_one_file(str(file))
 
 
