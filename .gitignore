@@ -6,6 +6,11 @@ test/
 download/
 key
 key.*
+*.rar
+*.zip
+*.7z
+*.tar
+*.tar*
 
 # IDE based
 .idea/
