@@ -6,38 +6,25 @@ requies `cryptodome` module.
 
 [https://asciiflow.com/#/](https://asciiflow.com/#/)
 
-```
-     +---------------------------+         
-     |for each file in ./_private|         
-     +-------------+-------------+         
-                   |                       
-                   v                       
-      +---------------------------+        
-      |    read file content      |        
-      +------------+--------------+        
-                   |                       
-                   v                       
-      +----------------------------+       
-      | encrypt using AES CBC mode |       
-      +------------+---------------+       
-                   |                       
-                   |                       
-+------------------v----------------------+
-| add a .enc suffix after original suffix |
-+------------------+----------------------+
-                   |                       
-                   |                       
-          +--------v----------+            
-          | save to ./_public |            
-          +---------+---------+            
-                    |                      
-                    |                      
-            +-------v-------+              
-            |  push to git  |              
-            +---------------+                          
-```
+1. For each file under `./_private`:
+   1. Read the file content.
+   2. Split the content into lines.
+   3. For each line, go through an AES encryption with CBC mode.
+   4. Each line is an **independent** AES encryption process with same key and IV.
+   5. Save the encrypted line to a new file under `./_public`.
+2. User command the script to push to remote git repo.
+3. On other PCs, clone (fetch, pull) the remote git repo.
+4. For each file under `./_public`:
+   1. Read the file content.
+   2. Split the content into lines.
+   3. Run AES decryption with CBC mode for each line.
+   4. Each line is an **independent** AES decryption process with same key and IV.
+   5. Save the decrypted line to a new file under `./_temp`.
+5. User may command to copy `./_temp` to overwrite original files under `./_private`.
 
 ### Encrypt:
+
+The following code handles newlines pretty well.
 
 ```python
 def aes_cbc_encrypt(plaintext: str, key: bytes, iv: bytes) -> str:
@@ -47,12 +34,18 @@ def aes_cbc_encrypt(plaintext: str, key: bytes, iv: bytes) -> str:
     :param key: 加密密钥（必须是16、24或32字节）
     :return: 加密后的密文（base64编码字符串），包含IV
     """
-    # 创建AES加密器
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    # 对明文进行填充（确保长度是块大小的倍数）并加密
-    ciphertext = cipher.encrypt(pad(plaintext.encode('utf-8'), AES.block_size))
-    # 将IV和密文组合后进行base64编码（IV用于解密）
-    return base64.b64encode(ciphertext).decode('utf-8')
+    lines = plaintext.splitlines()
+    result = []
+    for line in lines:
+        line = line.strip()
+        # 创建AES加密器
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        # 对明文进行填充（确保长度是块大小的倍数）并加密
+        ciphertext = cipher.encrypt(pad(line.encode('utf-8'), AES.block_size))
+        # 将IV和密文组合后进行base64编码（IV用于解密）
+        # return base64.b64encode(ciphertext).decode('utf-8')
+        result.append(base64.b64encode(ciphertext).decode('utf-8'))
+    return '\n'.join(result)
 
 
 def aes_cbc_decrypt(ciphertext_b64: str, key: bytes, iv: bytes) -> str:
@@ -64,13 +57,18 @@ def aes_cbc_decrypt(ciphertext_b64: str, key: bytes, iv: bytes) -> str:
     """
     # 解码base64并分离IV和密文
     # 创建AES解密器
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    data = base64.b64decode(ciphertext_b64)
-    # 解密并去除填充
-    plaintext = unpad(cipher.decrypt(data), AES.block_size)
-    return plaintext.decode('utf-8')
-
+    lines = ciphertext_b64.splitlines()
+    result = []
+    for line in lines:
+        data = base64.b64decode(line)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        # 解密并去除填充
+        plaintext = unpad(cipher.decrypt(data), AES.block_size)
+        # return plaintext.decode('utf-8')
+        result.append(plaintext.decode('utf-8'))
+    return '\n'.join(result)
 ```
+
 ### Key management:
 
 key is saved to `key.txt` with the following format:
