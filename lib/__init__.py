@@ -65,12 +65,18 @@ def aes_cbc_encrypt(plaintext: str, key: bytes, iv: bytes) -> str:
     :param key: 加密密钥（必须是16、24或32字节）
     :return: 加密后的密文（base64编码字符串），包含IV
     """
-    # 创建AES加密器
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    # 对明文进行填充（确保长度是块大小的倍数）并加密
-    ciphertext = cipher.encrypt(pad(plaintext.encode('utf-8'), AES.block_size))
-    # 将IV和密文组合后进行base64编码（IV用于解密）
-    return base64.b64encode(ciphertext).decode('utf-8')
+    lines = plaintext.splitlines()
+    result = []
+    for line in lines:
+        line = line.strip()
+        # 创建AES加密器
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        # 对明文进行填充（确保长度是块大小的倍数）并加密
+        ciphertext = cipher.encrypt(pad(line.encode('utf-8'), AES.block_size))
+        # 将IV和密文组合后进行base64编码（IV用于解密）
+        # return base64.b64encode(ciphertext).decode('utf-8')
+        result.append(base64.b64encode(ciphertext).decode('utf-8'))
+    return '\n'.join(result)
 
 
 def aes_cbc_decrypt(ciphertext_b64: str, key: bytes, iv: bytes) -> str:
@@ -82,8 +88,13 @@ def aes_cbc_decrypt(ciphertext_b64: str, key: bytes, iv: bytes) -> str:
     """
     # 解码base64并分离IV和密文
     # 创建AES解密器
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    data = base64.b64decode(ciphertext_b64)
-    # 解密并去除填充
-    plaintext = unpad(cipher.decrypt(data), AES.block_size)
-    return plaintext.decode('utf-8')
+    lines = ciphertext_b64.splitlines()
+    result = []
+    for line in lines:
+        data = base64.b64decode(line)
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        # 解密并去除填充
+        plaintext = unpad(cipher.decrypt(data), AES.block_size)
+        # return plaintext.decode('utf-8')
+        result.append(plaintext.decode('utf-8'))
+    return '\n'.join(result)
