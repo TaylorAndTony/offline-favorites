@@ -5,8 +5,8 @@ import csv
 console = Console()
 
 
-# target = './_private/B站up主备注-离线版.csv'
-target = './local/B站up主备注-离线版.csv'
+target = './_private/B站up主备注-离线版.csv'
+# target = './local/B站up主备注-离线版.csv'
 
 def read_csv(file) -> list[list[str]]:
     with open(file, 'r', encoding='utf-8-sig') as f:
