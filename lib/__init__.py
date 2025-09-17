@@ -68,6 +68,9 @@ def aes_cbc_encrypt(plaintext: str, key: bytes, iv: bytes) -> str:
     lines = plaintext.splitlines()
     result = []
     for line in lines:
+        if not line:
+            result.append('')
+            continue
         line = line.strip()
         # 创建AES加密器
         cipher = AES.new(key, AES.MODE_CBC, iv)
@@ -91,6 +94,9 @@ def aes_cbc_decrypt(ciphertext_b64: str, key: bytes, iv: bytes) -> str:
     lines = ciphertext_b64.splitlines()
     result = []
     for line in lines:
+        if not line:
+            result.append('')
+            continue
         data = base64.b64decode(line)
         cipher = AES.new(key, AES.MODE_CBC, iv)
         # 解密并去除填充
