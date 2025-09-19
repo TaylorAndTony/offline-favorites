@@ -1,12 +1,13 @@
 from rich.console import Console
+from rich.table import Table
 
 import csv
 
 console = Console()
 
 
-# target = './_private/B站up主备注-离线版.csv'
-target = './local/B站up主备注-离线版.csv'
+target = './_private/B站up主备注-离线版.csv'
+# target = './local/B站up主备注-离线版.csv'
 
 def read_csv(file) -> list[list[str]]:
     with open(file, 'r', encoding='utf-8-sig') as f:
@@ -19,6 +20,22 @@ def write_csv(data: list[list[str]], file) -> None:
         writer = csv.writer(f)
         # writer.writerow(data)
         writer.writerows(data)
+
+
+def find_up_by_name(data: list[list[str]], name: str) -> bool:
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("ID", style="bold green", width=6)
+    table.add_column("Up 主", style="bold blue")
+    table.add_column("备注", style="yellow")
+    table.add_column("URL", style="cyan")
+    found = False
+    for row in data:
+        if name.lower() in row[2].lower():
+            found = True
+            table.add_row(row[0], row[2], row[3], row[4])
+    if found:
+        console.print(table)
+    return found
 
 
 def main():
@@ -35,14 +52,18 @@ def main():
         new_id = int(last_id) + 1
     while True:
         console.print(f"最新 ID 为 {new_id}")
-        ask = console.input('\n[yellow]* 输入从前端脚本复制的 csv 字符串，q 退出: ')
+        ask = console.input('\n[yellow]* 输入复制的 csv 字符串，或者一个 Up 的名字，q 退出: ')
         if ask in ('q', 'Q'):
             console.print("[green]退出程序")
             break
         parts = ask.split(',')
         length = len(parts)
         if length != 5:
-            console.print("[red]输入格式错误，请检查输入内容")
+            console.print("检索 Up 主")
+            up_name = ask.strip()
+            flag = find_up_by_name(read, up_name)
+            if not flag:
+                console.print(f"[red]未找到 Up 主：{up_name}")
             continue
         more_tags = console.input('[yellow]* 输入更多标签，空格分割，回车跳过: ')
         if more_tags:
